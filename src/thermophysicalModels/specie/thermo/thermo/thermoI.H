@@ -140,7 +140,7 @@ Foam::species::thermo<Thermo, Type>::Kc(const scalar p, const scalar T) const
 {
     const scalar nm = this->Y()/this->W();
 
-    if (equal(nm, small))
+    if (mag(nm) < small)
     {
         return Kp(p, T);
     }
@@ -160,7 +160,7 @@ inline Foam::scalar Foam::species::thermo<Thermo, Type>::Kx
 {
     const scalar nm = this->Y()/this->W();
 
-    if (equal(nm, small))
+    if (mag(nm) < small)
     {
         return Kp(p, T);
     }
@@ -181,7 +181,7 @@ inline Foam::scalar Foam::species::thermo<Thermo, Type>::Kn
 {
     const scalar nm = this->Y()/this->W();
 
-    if (equal(nm, small))
+    if (mag(nm) < small)
     {
         return Kp(p, T);
     }
@@ -377,7 +377,7 @@ Foam::species::thermo<Thermo, Type>::dKcdTbyKc
         (this->s(pStd, T) + this->gStd(T)/T)*this->Y()/(RR*T);
 
     const scalar nm = this->Y()/this->W();
-    if (equal(nm, small))
+    if (mag(nm) < small)
     {
         return dKcdTbyKc;
     }
