@@ -71,6 +71,10 @@ private:
         //- Temporary storage for the cell/face mixture thermo data
         mutable thermoMixtureType mixture_;
 
+        //- Scratch for one scaled species thermo while mixing, so that
+        //  thermoMixture builds no temporaries (see the .C)
+        mutable thermoMixtureType scratch_;
+
 
 public:
 

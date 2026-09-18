@@ -35,7 +35,8 @@ coefficientMulticomponentMixture
 )
 :
     multicomponentMixture<ThermoType>(dict),
-    mixture_("mixture", this->specieThermos()[0])
+    mixture_("mixture", this->specieThermos()[0]),
+    scratch_("mixture", this->specieThermos()[0])
 {}
 
 
@@ -50,13 +51,24 @@ Foam::coefficientMulticomponentMixture<ThermoType>::thermoMixture
 ) const
 {
     const boolList& active(this->speciesActive());
-    mixture_ = Y[0]*this->specieThermos()[0];
+
+    // Scale in place rather than forming Y[i]*thermo temporaries. Each such
+    // temporary copy-constructs the specie, name string included, three
+    // times on its way through the equation of state, the thermo and the
+    // transport wrapper; assignment does not copy the name (specie::operator=)
+    // and operator*= scales only Y. s*Y and Y*s are the same IEEE product,
+    // so the mixture is bit-identical. Profiled at 6 % of a production step
+    // on a 33-species case (rde_engine benchmarks/openfoam-hotpath).
+    mixture_ = this->specieThermos()[0];
+    mixture_ *= Y[0];
 
     for (label i=1; i<Y.size(); i++)
     {
         if (active[i])
         {
-            mixture_ += Y[i]*this->specieThermos()[i];
+            scratch_ = this->specieThermos()[i];
+            scratch_ *= Y[i];
+            mixture_ += scratch_;
         }
     }
 
